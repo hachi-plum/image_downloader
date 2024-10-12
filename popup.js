@@ -6,6 +6,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   const maxWidthInput = document.getElementById('maxWidth');
   const minHeightInput = document.getElementById('minHeight');
   const maxHeightInput = document.getElementById('maxHeight');
+  const folderNameInput = document.getElementById('folderName');
+  const fileNamePrefixInput = document.getElementById('fileNamePrefix');
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 
   let images = [];
@@ -16,11 +18,17 @@ document.addEventListener("DOMContentLoaded", async () => {
   // 画像をページから取得する
   chrome.scripting.executeScript({
     target: { tabId: tab.id },
-    func: () => Array.from(document.images, img => ({
-      src: img.src,
-      width: img.naturalWidth,
-      height: img.naturalHeight
-    })),
+    func: () => Array.from(document.images, img => {
+      function removeNameParam(url) {
+        return url.split('&name=')[0];  // &name=以降を削除
+      }
+      return {
+        src: img.src,
+        naturalSrc: removeNameParam(img.src),  // 元画像のURLを生成
+        width: img.naturalWidth,
+        height: img.naturalHeight
+      };
+    }),
   }, (results) => {
     images = results[0].result;
     renderImages(images);
@@ -29,20 +37,20 @@ document.addEventListener("DOMContentLoaded", async () => {
   // 画像を表示する関数
   function renderImages(imagesToRender) {
     imageContainer.innerHTML = ''; // リストをリセット
-    imagesToRender.forEach((image) => {
+    imagesToRender.forEach((image, index) => {
       const div = document.createElement('div');
       div.classList.add('image-item');
 
       const img = document.createElement('img');
       img.src = image.src;
 
-      const checkbox = document.createElement('input');
-      checkbox.type = 'checkbox';
-      checkbox.value = image.src;
-
       div.appendChild(img);
-      div.appendChild(checkbox);
       imageContainer.appendChild(div);
+
+      // クリックで選択・解除
+      div.addEventListener('click', () => {
+        div.classList.toggle('selected');
+      });
     });
   }
 
@@ -54,9 +62,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // 全選択ボタンのイベント
   selectAllButton.addEventListener('click', () => {
-    const checkboxes = document.querySelectorAll('input[type="checkbox"]');
-    checkboxes.forEach(checkbox => {
-      checkbox.checked = true;
+    const imageItems = document.querySelectorAll('.image-item');
+    imageItems.forEach(item => {
+      item.classList.add('selected');
     });
   });
 
@@ -81,13 +89,23 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // ダウンロードボタンのイベント
   downloadButton.addEventListener('click', () => {
-    const selectedImages = Array.from(document.querySelectorAll('input[type="checkbox"]:checked'))
-      .map(checkbox => checkbox.value);
+    const folderName = folderNameInput.value || 'Downloaded Images';  // フォルダ名を取得
+    const fileNamePrefix = fileNamePrefixInput.value || 'image_';  // ファイル名プレフィックスを取得
+
+    const selectedImages = Array.from(document.querySelectorAll('.image-item.selected'))
+      .map(item => {
+        const imgElement = item.querySelector('img');
+        const image = images.find(img => img.src === imgElement.src);
+        return image.naturalSrc;  // naturalSrcを使用して元の画像URLを保存
+      });
 
     chrome.runtime.sendMessage({
       type: 'downloadImages',
       imagesToDownload: selectedImages,
-      options: { folder_name: 'Downloaded Images', new_file_name: 'image_' }
+      options: { 
+        folder_name: folderName,  // ユーザーが入力したフォルダ名
+        new_file_name: fileNamePrefix  // ユーザーが入力したファイル名プレフィックス
+      }
     });
   });
 });

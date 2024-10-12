@@ -4,40 +4,52 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Image Downloader</title>
-  <style>
-    img { width: 100px; height: auto; margin: 10px; }
-    .image-container { display: flex; flex-wrap: wrap; }
-    .image-item { margin: 5px; }
-  </style>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <h1>Select images to download</h1>
-  
+
   <!-- すべて選択ボタン -->
   <button id="selectAllButton">Select All</button>
 
   <!-- 画像幅フィルター入力 -->
-  <div>
-    <label for="minWidth">Min Width (px): </label>
-    <input type="number" id="minWidth" name="minWidth" min="0" value="0">
-  </div>
-  <div>
-    <label for="maxWidth">Max Width (px): </label>
-    <input type="number" id="maxWidth" name="maxWidth" min="0" value="5000">
+  <div class="filter">
+    <div>
+      <label for="minWidth">Min Width (px): </label>
+      <input type="number" id="minWidth" name="minWidth" min="0" value="0">
+    </div>
+    <div>
+      <label for="maxWidth">Max Width (px): </label>
+      <input type="number" id="maxWidth" name="maxWidth" min="0" value="5000">
+    </div>
+
+    <!-- 画像高さフィルター入力 -->
+    <div>
+      <label for="minHeight">Min Height (px): </label>
+      <input type="number" id="minHeight" name="minHeight" min="0" value="0">
+    </div>
+    <div>
+      <label for="maxHeight">Max Height (px): </label>
+      <input type="number" id="maxHeight" name="maxHeight" min="0" value="5000">
+    </div>
   </div>
 
-  <!-- 画像高さフィルター入力 -->
-  <div>
-    <label for="minHeight">Min Height (px): </label>
-    <input type="number" id="minHeight" name="minHeight" min="0" value="0">
-  </div>
-  <div>
-    <label for="maxHeight">Max Height (px): </label>
-    <input type="number" id="maxHeight" name="maxHeight" min="0" value="5000">
+  <!-- フォルダ名とファイル名の入力 -->
+  <div class="folder-file-naming">
+    <div>
+      <label for="folderName">Folder Name: </label>
+      <input type="text" id="folderName" placeholder="Enter folder name">
+    </div>
+    <div>
+      <label for="fileNamePrefix">File Name Prefix: </label>
+      <input type="text" id="fileNamePrefix" placeholder="Enter file name prefix">
+    </div>
   </div>
 
   <!-- 画像表示部分 -->
   <div class="image-container" id="imageContainer"></div>
+
+  <!-- ダウンロードボタン -->
   <button id="downloadButton">Download Selected</button>
 
   <script src="popup.js"></script>
