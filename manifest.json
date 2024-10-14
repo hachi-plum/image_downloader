@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Image Downloader",
   "version": "1.0",
-  "description": "Select and download images from a web page",
+  "description": "表示されている画像をダウンロードします。",
   "permissions": [
     "downloads",
     "activeTab",
